@@ -16,7 +16,7 @@ class PizzaOrder {
     }
 }
 
-public class PizzaMenu {
+public class Main {
     static ArrayList<String> pizzaMenu = new ArrayList<>();
     static ArrayList<PizzaOrder> orders = new ArrayList<>();
     static final String ORDER_FILE = "bestillinger.txt";
