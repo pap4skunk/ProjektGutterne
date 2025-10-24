@@ -15,3 +15,4 @@ public class Pizza {
         return navn + " (" + pris + " kr)";
     }
 }
+

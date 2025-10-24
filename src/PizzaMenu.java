@@ -22,14 +22,10 @@ public class PizzaMenu {
         ));
     }
 
-    public List<Pizza> getMenu() {
-        return menu;
-    }
+    public List<Pizza> getMenu() { return menu; }
 
     public Pizza getPizza(int index) {
-        if (index >= 0 && index < menu.size()) {
-            return menu.get(index);
-        }
+        if (index >= 0 && index < menu.size()) return menu.get(index);
         return null;
     }
 

@@ -1,14 +1,12 @@
-import java.util.*;
 import java.io.*;
+import java.util.*;
 
 public class OrderManager {
     private List<PizzaOrder> orders = new ArrayList<>();
     private final String ORDER_FILE = "bestillinger.txt";
     private final String SOLD_FILE = "solgte_pizzaer.txt";
 
-    public List<PizzaOrder> getOrders() {
-        return orders;
-    }
+    public List<PizzaOrder> getOrders() { return orders; }
 
     public void loadOrders() {
         orders.clear();
@@ -29,7 +27,6 @@ public class OrderManager {
                             }
                         }
                     }
-                    // Pris læses ikke fra filen, da den beregnes automatisk
                     orders.add(new PizzaOrder(new Pizza(pizzaName, 0), pickupTime, extras));
                 }
             }
@@ -45,7 +42,8 @@ public class OrderManager {
 
     public void removeOrder(int index) {
         PizzaOrder removed = orders.remove(index);
-        FileHandler.appendToFile(SOLD_FILE, removed.getPizzaName());
+        String soldLine = removed.getPizzaName() + "|" + removed.calculatePrice();
+        FileHandler.appendToFile(SOLD_FILE, soldLine);
         FileHandler.overwriteFile(ORDER_FILE, orders);
     }
 
@@ -59,23 +57,49 @@ public class OrderManager {
         }
     }
 
-    public void showStatistics(List<Pizza> menu) {
-        Map<String, Integer> stats = new HashMap<>();
+    public void showSalesSummary() {
+        Map<String, Integer> salesCount = new HashMap<>();
+        Map<String, Integer> revenuePerPizza = new HashMap<>();
+        int totalRevenue = 0;
+        int totalSold = 0;
+
         try (BufferedReader reader = new BufferedReader(new FileReader(SOLD_FILE))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                stats.put(line, stats.getOrDefault(line, 0) + 1);
+                String[] parts = line.split("\\|");
+                String pizzaName = parts[0];
+                int price = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
+                salesCount.put(pizzaName, salesCount.getOrDefault(pizzaName, 0) + 1);
+                revenuePerPizza.put(pizzaName, revenuePerPizza.getOrDefault(pizzaName, 0) + price);
+                totalRevenue += price;
+                totalSold++;
             }
         } catch (IOException e) {
-            System.out.println("Fejl ved læsning af statistikfil.");
+            System.out.println("Ingen solgte pizzaer fundet.");
             return;
         }
 
-        System.out.println("\n--- STATISTIK OVER SOLGTE PIZZAER ---");
-        for (int i = 0; i < menu.size(); i++) {
-            String pizza = menu.get(i).getNavn();
-            int count = stats.getOrDefault(pizza, 0);
-            System.out.printf("%2d. %-15s solgt: %d stk.\n", i + 1, pizza, count);
+        if (salesCount.isEmpty()) {
+            System.out.println("Ingen solgte pizzaer endnu.");
+            return;
         }
+
+        String bestSeller = null;
+        int maxSold = 0;
+
+        System.out.println("\n--- STATISTIK OVER SOLGTE PIZZAER ---");
+        for (String pizza : salesCount.keySet()) {
+            int count = salesCount.get(pizza);
+            int revenue = revenuePerPizza.get(pizza);
+            System.out.printf("%s: solgt %d stk, omsætning %d kr\n", pizza, count, revenue);
+            if (count > maxSold) {
+                maxSold = count;
+                bestSeller = pizza;
+            }
+        }
+
+        System.out.println("\nTotal omsætning: " + totalRevenue + " kr");
+        System.out.println("Bedst sælgende pizza: " + bestSeller + " (" + maxSold + " stk)");
+        System.out.println("Antal pizzaer solgt: " + totalSold);
     }
 }

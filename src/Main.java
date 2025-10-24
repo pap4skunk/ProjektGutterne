@@ -9,21 +9,27 @@ public class Main {
 
         boolean running = true;
         while (running) {
-            System.out.println("\n1. Tilføj bestilling");
+            System.out.println("\n--- PIZZA BESTILLING SYSTEM ---");
+            System.out.println("1. Tilføj bestilling");
             System.out.println("2. Fjern afhentet bestilling");
             System.out.println("3. Vis statistik over solgte pizzaer");
             System.out.println("4. Rediger ekstra ingredienser");
             System.out.println("5. Afslut");
             System.out.print("\nVælg: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine();
+
+            int choice;
+            try {
+                choice = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.println("Ugyldigt valg. Skriv et tal mellem 1-5.");
+                continue;
+            }
 
             switch (choice) {
-                case 1 -> {
+                case 1 -> { // Tilføj bestilling
                     menu.printMenu();
                     System.out.print("Vælg pizza (1-" + menu.getMenu().size() + "): ");
-                    int pizzaChoice = scanner.nextInt();
-                    scanner.nextLine();
+                    int pizzaChoice = Integer.parseInt(scanner.nextLine());
                     if (pizzaChoice < 1 || pizzaChoice > menu.getMenu().size()) {
                         System.out.println("Ugyldigt valg.");
                         break;
@@ -47,7 +53,7 @@ public class Main {
                     System.out.println("Bestilling tilføjet: " + order);
                 }
 
-                case 2 -> {
+                case 2 -> { // Fjern afhentet bestilling
                     List<PizzaOrder> orders = manager.getOrders();
                     if (orders.isEmpty()) {
                         System.out.println("Ingen aktive bestillinger.");
@@ -57,19 +63,18 @@ public class Main {
                         System.out.println((i + 1) + ". " + orders.get(i));
                     }
                     System.out.print("Vælg nummer på afhentet bestilling: ");
-                    int index = scanner.nextInt();
-                    scanner.nextLine();
-                    if (index < 1 || index > orders.size()) {
+                    int index = Integer.parseInt(scanner.nextLine()) - 1;
+                    if (index < 0 || index >= orders.size()) {
                         System.out.println("Ugyldigt valg.");
                         break;
                     }
-                    manager.removeOrder(index - 1);
+                    manager.removeOrder(index);
                     System.out.println("Bestilling fjernet og registreret som solgt.");
                 }
 
-                case 3 -> manager.showStatistics(menu.getMenu());
+                case 3 -> manager.showSalesSummary(); // Vis statistik
 
-                case 4 -> {
+                case 4 -> { // Rediger ekstra ingredienser
                     List<PizzaOrder> orders = manager.getOrders();
                     if (orders.isEmpty()) {
                         System.out.println("Ingen aktive bestillinger.");
@@ -79,8 +84,7 @@ public class Main {
                         System.out.println((i + 1) + ". " + orders.get(i));
                     }
                     System.out.print("Vælg bestilling: ");
-                    int idx = scanner.nextInt() - 1;
-                    scanner.nextLine();
+                    int idx = Integer.parseInt(scanner.nextLine()) - 1;
                     if (idx < 0 || idx >= orders.size()) {
                         System.out.println("Ugyldigt valg.");
                         break;
@@ -90,7 +94,7 @@ public class Main {
                     manager.editOrderIngredients(idx, ingredient);
                 }
 
-                case 5 -> {
+                case 5 -> { // Afslut program
                     running = false;
                     System.out.println("Programmet afsluttes...");
                 }
@@ -98,5 +102,6 @@ public class Main {
                 default -> System.out.println("Ugyldigt valg.");
             }
         }
+        scanner.close();
     }
 }
