@@ -1,21 +1,32 @@
 import java.util.*;
 
 public class PizzaMenu {
-    private List<String> menu;
+    private List<Pizza> menu;
 
     public PizzaMenu() {
         menu = new ArrayList<>(List.of(
-                "Margherita", "Pepperoni", "Hawaii", "Vegetar", "Kebab", "Skinke og ost",
-                "BBQ Chicken", "Mexicana", "Vesuvio", "Capricciosa", "Tuna Special",
-                "Meat Lovers", "Spinaci", "Diavola"
+                new Pizza("Margherita", 75),
+                new Pizza("Pepperoni", 85),
+                new Pizza("Hawaii", 80),
+                new Pizza("Vegetar", 79),
+                new Pizza("Kebab", 85),
+                new Pizza("Skinke og ost", 80),
+                new Pizza("BBQ Chicken", 90),
+                new Pizza("Mexicana", 89),
+                new Pizza("Vesuvio", 84),
+                new Pizza("Capricciosa", 86),
+                new Pizza("Tuna Special", 82),
+                new Pizza("Meat Lovers", 95),
+                new Pizza("Spinaci", 78),
+                new Pizza("Diavola", 88)
         ));
     }
 
-    public List<String> getMenu() {
+    public List<Pizza> getMenu() {
         return menu;
     }
 
-    public String getPizza(int index) {
+    public Pizza getPizza(int index) {
         if (index >= 0 && index < menu.size()) {
             return menu.get(index);
         }

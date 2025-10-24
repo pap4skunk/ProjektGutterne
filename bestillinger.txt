@@ -1,3 +1,0 @@
-Pizza: Mexicana | Klar til: 15 | Ekstra: Ingen | Pris: 80 kr
-Pizza: Spinaci | Klar til: 17 | Ekstra: kød | Pris: 80 kr
-Pizza: Spinaci | Klar til: 14 | Ekstra: -ost | Pris: 80 kr

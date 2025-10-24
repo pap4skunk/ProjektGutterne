@@ -29,7 +29,8 @@ public class OrderManager {
                             }
                         }
                     }
-                    orders.add(new PizzaOrder(pizzaName, pickupTime, extras));
+                    // Pris læses ikke fra filen, da den beregnes automatisk
+                    orders.add(new PizzaOrder(new Pizza(pizzaName, 0), pickupTime, extras));
                 }
             }
         } catch (IOException e) {
@@ -58,7 +59,7 @@ public class OrderManager {
         }
     }
 
-    public void showStatistics(List<String> menu) {
+    public void showStatistics(List<Pizza> menu) {
         Map<String, Integer> stats = new HashMap<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(SOLD_FILE))) {
             String line;
@@ -72,9 +73,9 @@ public class OrderManager {
 
         System.out.println("\n--- STATISTIK OVER SOLGTE PIZZAER ---");
         for (int i = 0; i < menu.size(); i++) {
-            String pizza = menu.get(i);
+            String pizza = menu.get(i).getNavn();
             int count = stats.getOrDefault(pizza, 0);
-            System.out.printf("%2d. %s: x%d\n", i + 1, pizza, count);
+            System.out.printf("%2d. %-15s solgt: %d stk.\n", i + 1, pizza, count);
         }
     }
 }
