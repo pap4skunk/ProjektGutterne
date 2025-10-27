@@ -22,7 +22,7 @@ public class PizzaOrder {
     @Override
     public String toString() {
         String extras = extraIngredients.isEmpty() ? "Ingen" : String.join(", ", extraIngredients);
-        return String.format("Pizza: %s, Klar til: %s, Ekstra: %s, Pris: %d kr",
+        return String.format("Pizza: %s | Klar til: %s | Ekstra: %s | Pris: %d kr",
                 pizza.getNavn(), pickupTime, extras, calculatePrice());
     }
 
@@ -30,4 +30,3 @@ public class PizzaOrder {
         return pizza.getNavn();
     }
 }
-
