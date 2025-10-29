@@ -1,46 +1,23 @@
 import java.io.*;
+import java.util.*;
 
 public class FileHandler {
-    public static void writeToFile(String order) {
-        String bestillingerFile = "bestillinger.txt";
-
-        try (FileWriter writer = new FileWriter(bestillingerFile, true)) {
-            int totalSold = 1;
-            String pizza = "Pepperoni";
-            int price = 53;
-            writer.write(order + "\n");
+    public static void appendToFile(String filename, String content) {
+        try (FileWriter writer = new FileWriter(filename, true)) {
+            writer.write(content + "\n");
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println("Fejl ved skrivning til fil: " + filename);
         }
     }
 
-    public static String readOrderFromFile() {
-        String komma = ",";
-        String line = "";
-        String regnskabFile = "regnskab.txt";
-        String name = null;
-        int price = 0;
-
-        try (BufferedReader br = new BufferedReader(new FileReader(regnskabFile))) {
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(komma);
-                name = data[0];
-                price = Integer.parseInt(data[1]);
+    public static void overwriteFile(String filename, List<PizzaOrder> orders) {
+        try (FileWriter writer = new FileWriter(filename, false)) {
+            for (PizzaOrder order : orders) {
+                writer.write(order.toString() + "\n");
             }
-
         } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return name + "," + price;
-    }
-
-    public static void overwriteFile(String orders) {
-        String regnskabFile = "regnskab.txt";
-
-        try (FileWriter writer = new FileWriter(regnskabFile, true)) {
-            writer.write(orders + "\n");
-        } catch (IOException e) {
-            System.out.println("Fejl ved opdatering af regnskabsfil.");
+            System.out.println("Fejl ved opdatering af bestillingsfil.");
         }
     }
 }
+
