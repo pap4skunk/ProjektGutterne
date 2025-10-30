@@ -1,169 +1,113 @@
-import java.io.*;
-import java.util.*;
-
-class PizzaOrder {
-    String pizzaName;
-    String pickupTime;
-
-    public PizzaOrder(String pizzaName, String pickupTime) {
-        this.pizzaName = pizzaName;
-        this.pickupTime = pickupTime;
-    }
-
-    @Override
-    public String toString() {
-        return "Pizza: " + pizzaName + " | Klar til: " + pickupTime;
-    }
-}
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
 
 public class Main {
-    static ArrayList<String> pizzaMenu = new ArrayList<>();
-    static ArrayList<PizzaOrder> orders = new ArrayList<>();
-    static final String ORDER_FILE = "bestillinger.txt";
-    static final String SOLD_FILE = "solgte_pizzaer.txt";
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        initMenu();
-        loadOrdersFromFile();
+        PizzaMenu menu = new PizzaMenu();
+        OdrerManager manager = new OdrerManager();
+        manager.loadOdre();
 
-        boolean running = true;
-        while (running) {
-            System.out.println("\n1. Tilføj bestilling");
+        boolean go = true;
+        while (go) {
+            System.out.println("\n  PIZZA BESTILLINGS SYSTEM  ");
+            System.out.println("1. Tilføj bestilling");
             System.out.println("2. Fjern afhentet bestilling");
             System.out.println("3. Vis statistik over solgte pizzaer");
-            System.out.println("4. Afslut");
+            System.out.println("4. Rediger ekstra ingredienser");
+            System.out.println("5. Afslut");
             System.out.print("\nVælg: ");
-            int choice = scanner.nextInt();
-            scanner.nextLine();
 
-            switch (choice) {
-                case 1 -> addOrder(scanner);
-                case 2 -> removeOrder(scanner);
-                case 3 -> showStatistics();
-                case 4 -> running = false;
-                default -> System.out.println("Ugyldigt valg.");
+
+            int valg;
+            try {
+                valg = Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.print("Ugyldigt valg. Skriv et tal mellem 1-5.");
+                continue;
             }
-        }
 
-        scanner.close();
-    }
+            switch (valg) {
+                case 1 -> {
+                    menu.printMenu();
+                    System.out.print("Vælg pizza (1-" + menu.getMenu().size() + "): ");
+                    int pizzaValg = Integer.parseInt(scanner.nextLine());
+                    if (pizzaValg < 1 || pizzaValg > menu.getMenu().size()) {
+                        System.out.println("Ugyldigt valg.");
+                        break;
+                    }
 
-    static void initMenu() {
-        pizzaMenu.addAll(List.of(
-                "Margherita", "Pepperoni", "Hawaii", "Vegetar", "Kebab", "Skinke og ost",
-                "BBQ Chicken", "Mexicana", "Vesuvio", "Capricciosa", "Tuna Special",
-                "Meat Lovers", "Spinaci", "Diavola"
-        ));
-    }
+                    Pizza valgtPizza = menu.getPizza(pizzaValg - 1);
+                    System.out.print("Tidspunkt for afhetning: ");
+                    String tid = scanner.nextLine();
 
-    static void loadOrdersFromFile() {
-        try (BufferedReader reader = new BufferedReader(new FileReader(ORDER_FILE))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split("\\| Klar til: ");
-                if (parts.length == 2) {
-                    String pizzaName = parts[0].replace("Pizza: ", "").trim();
-                    String pickupTime = parts[1].trim();
-                    orders.add(new PizzaOrder(pizzaName, pickupTime));
+                    List<String> ekstra = new ArrayList<>();
+                    System.out.println("Tilføj ekstra ingredienser (tast '0' for at afslutte):");
+                    while (true) {
+                        System.out.print("Ekstra ingrediens: ");
+                        String tast = scanner.nextLine().trim();
+                        if (tast.equalsIgnoreCase("0")) break;
+                        if (!tast.isEmpty()) ekstra.add(tast);
+                    }
+
+                    PizzaOrdrer ordrer = new PizzaOrdrer(valgtPizza, tid, ekstra);
+                    manager.tilfojOrdre(ordrer);
+                    System.out.println("Bestilling tilføjet: " + ordrer);
                 }
+
+                case 2 -> {
+                    List<PizzaOrdrer> ord = manager.getOrd();
+                    if (ord.isEmpty()) {
+                        System.out.println("Ingen aktive bestillinger.");
+                        break;
+                    }
+                    for (int i = 0; i <ord.size(); i++) {
+                        System.out.println((i + 1) +". " + ord.get(i));
+                    }
+                    System.out.print("Vælg nummer på afhentet bestilling: ");
+                    int index = Integer.parseInt(scanner.nextLine()) - 1;
+                    if (index < 0 || index >= ord.size()) {
+                        System.out.println("Ugyldigt valg.");
+                        break;
+                    }
+                    manager.fjernOrdre(index);
+                    System.out.println("Bestilling fjernet og tilføjet til solgte.");
+                }
+
+                case 3 -> manager.visSalg();
+
+                case 4 -> {
+                    List<PizzaOrdrer> ord = manager.getOrd();
+                    if (ord.isEmpty()) {
+                        System.out.println("Ingen aktive bestillinger.");
+                        break;
+                    }
+                    for (int i = 0; i < ord.size(); i++) {
+                        System.out.println((i + 1) + ". " + ord.get(i));
+                    }
+                    System.out.print("Vælg bestilling: ");
+                    int idx = Integer.parseInt(scanner.nextLine()) - 1;
+                    if (idx < 0 || idx >= ord.size()) {
+                        System.out.println("Ugyldigt valg.");
+                        break;
+                    }
+                    System.out.print("Indtast ingrediens der skal fjernes: ");
+                    String ingrediens = scanner.nextLine();
+                    manager.redigerIngredienser(idx, ingrediens);
+                }
+
+                case 5 -> {
+                    go = false;
+                    System.out.println("Programmet afsluttes");
+                }
+
+                default -> System.out.println("Ugyldigt valg");
+
+
             }
-        } catch (IOException e) {
-            System.out.println("Ingen tidligere bestillinger fundet.");
         }
-    }
-
-    static void addOrder(Scanner scanner) {
-        System.out.println("\n--- PIZZAMENU ---");
-        for (int i = 0; i < pizzaMenu.size(); i++) {
-            System.out.println((i + 1) + ". " + pizzaMenu.get(i));
-        }
-
-        System.out.print("Vælg pizza (1-14): ");
-        int pizzaChoice = scanner.nextInt();
-        scanner.nextLine();
-
-        if (pizzaChoice < 1 || pizzaChoice > 14) {
-            System.out.println("Ugyldigt valg.");
-            return;
-        }
-
-        String chosenPizza = pizzaMenu.get(pizzaChoice - 1);
-        System.out.print("Tidspunkt for afhentning (fx 18.30): ");
-        String time = scanner.nextLine();
-
-        PizzaOrder order = new PizzaOrder(chosenPizza, time);
-        orders.add(order);
-        appendToFile(ORDER_FILE, order.toString());
-
-        System.out.println("Bestilling tilføjet.");
-    }
-
-    static void removeOrder(Scanner scanner) {
-        if (orders.isEmpty()) {
-            System.out.println("Ingen aktive bestillinger.");
-            return;
-        }
-
-        System.out.println("\n--- AKTIVE BESTILLINGER ---");
-        for (int i = 0; i < orders.size(); i++) {
-            System.out.println((i + 1) + ". " + orders.get(i));
-        }
-
-        System.out.print("Vælg nummer på afhentet bestilling: ");
-        int index = scanner.nextInt();
-        scanner.nextLine();
-
-        if (index < 1 || index > orders.size()) {
-            System.out.println("Ugyldigt valg.");
-            return;
-        }
-
-        PizzaOrder removed = orders.remove(index - 1);
-        appendToFile(SOLD_FILE, removed.pizzaName);
-        overwriteOrderFile();
-
-        System.out.println("Bestilling fjernet og registreret som solgt.");
-    }
-
-    static void showStatistics() {
-        Map<String, Integer> stats = new HashMap<>();
-
-        try (BufferedReader reader = new BufferedReader(new FileReader(SOLD_FILE))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                stats.put(line, stats.getOrDefault(line, 0) + 1);
-            }
-        } catch (IOException e) {
-            System.out.println("Fejl ved læsning af statistikfil.");
-            return;
-        }
-
-        System.out.println("\n--- STATISTIK OVER SOLGTE PIZZAER ---");
-        if (stats.isEmpty()) {
-            System.out.println("Ingen pizzaer solgt endnu.");
-        } else {
-            stats.entrySet().stream()
-                    .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
-                    .forEach(entry -> System.out.printf("%s: %d stk\n", entry.getKey(), entry.getValue()));
-        }
-    }
-
-    static void appendToFile(String filename, String content) {
-        try (FileWriter writer = new FileWriter(filename, true)) {
-            writer.write(content + "\n");
-        } catch (IOException e) {
-            System.out.println("Fejl ved skrivning til fil: " + filename);
-        }
-    }
-
-    static void overwriteOrderFile() {
-        try (FileWriter writer = new FileWriter(ORDER_FILE, false)) {
-            for (PizzaOrder order : orders) {
-                writer.write(order.toString() + "\n");
-            }
-        } catch (IOException e) {
-            System.out.println("Fejl ved opdatering af bestillingsfil.");
-        }
+        scanner.close();
     }
 }
